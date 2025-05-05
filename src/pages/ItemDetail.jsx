@@ -13,19 +13,28 @@ const ItemDetail = () => {
         handleDelete,
         navigate
     } = useItemDetail();
-    const { addItem } = useCart();
+
+    const { addItem, cart } = useCart();
 
     const handleAddToCart = () => {
         addItem(item, 1);
-        // opcional: notificación SweetAlert, toast…
         Swal.fire({
             icon: 'success',
-            title: 'Producto añadido al carrito',
-            text: `${item.name} ha sido añadido a tu carrito.`,
-            showConfirmButton: false,
-            timer: 1500
+            title: 'Añadido al carrito',
+            text: `${item.name} ha sido añadido.`,
+            showCancelButton: true,
+            confirmButtonText: 'Ver carrito',
+            cancelButtonText: 'Seguir comprando'
+        }).then(result => {
+            if (result.isConfirmed) navigate('/cart');
         });
     };
+
+    // Cantidad que ya tenemos en el carrito
+    const inCart = cart.find(i => i._id === item?._id);
+    const cartQty = inCart?.quantity ?? 0;
+    const available = item?.quantity ?? 0;
+    const canAdd = cartQty < available;
 
     if (loading) return <div className="text-center py-8">Cargando...</div>;
     if (!item) return <div className="text-center py-8">Producto no encontrado</div>;
@@ -101,6 +110,7 @@ const ItemDetail = () => {
 
                         {/* Botones de acción */}
                         <div className="flex flex-wrap gap-3">
+                            {/* Botón para "comprar" */}
                             <button
                                 onClick={() => console.log("Iniciando compra...")}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg transition-colors font-medium flex-1"
@@ -109,11 +119,21 @@ const ItemDetail = () => {
                                 {item.quantity > 0 ? 'Comprar ahora' : 'Producto agotado'}
                             </button>
 
-                            <button onClick={handleAddToCart}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg">
-                                Agregar al carrito
+                            {/* Botón para agregar al carrito */}
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={!canAdd}
+                                className={`px-6 py-3 rounded-lg transition-colors ${canAdd
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                    }`}
+                            >
+                                {canAdd
+                                    ? 'Agregar al carrito'
+                                    : `Máximo ${item.quantity} unidades`}
                             </button>
 
+                            {/* Botón para editar*/}
                             {canEdit && (
                                 <button
                                     onClick={() => navigate(`/items/edit/${item._id}`)}
@@ -123,6 +143,7 @@ const ItemDetail = () => {
                                 </button>
                             )}
 
+                            {/*Botón para eliminar*/}
                             {canDelete && (
                                 <button
                                     onClick={handleDelete}

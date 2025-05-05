@@ -1,68 +1,71 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { createContext, useContext, useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    const { user } = useAuth();
-    const storageKey = user ? `cart_${user._id}` : null;
-
-    const [cart, setCart] = useState([]);
-
-    // 1️⃣ Carga inicial desde localStorage
-    useEffect(() => {
-        if (!storageKey) {
-            setCart([]);
-            return;
+    const [cart, setCart] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('myCart')) || [];
+        } catch {
+            return [];
         }
-        const saved = localStorage.getItem(storageKey);
-        setCart(saved ? JSON.parse(saved) : []);
-    }, [storageKey]);
+    });
 
-    // 2️⃣ Siempre que cambie carrito, lo persistimos
     useEffect(() => {
-        if (storageKey) {
-            localStorage.setItem(storageKey, JSON.stringify(cart));
-        }
-    }, [cart, storageKey]);
+        localStorage.setItem('myCart', JSON.stringify(cart));
+    }, [cart]);
 
-    // 3️⃣ Añadir un producto (o actualizar cantidad)
-    const addItem = useCallback((product, qty = 1) => {
+    const addItem = (product, qty = 1) => {
+        const id = product._id || product.id;
         setCart(prev => {
-            const idx = prev.findIndex(i => i._id === product._id);
-            if (idx > -1) {
-                const updated = [...prev];
-                updated[idx].quantity += qty;
-                return updated;
+            const idx = prev.findIndex(i => i._id === id);
+            const currentQty = idx > -1 ? prev[idx].quantity : 0;
+            const maxStock = product.quantity;
+            if (currentQty + qty > maxStock) {
+                Swal.fire('Ups', `Sólo hay ${maxStock} unidades disponibles`, 'warning');
+                return prev;
             }
-            return [...prev, { ...product, quantity: qty }];
+            if (idx > -1) {
+                return prev.map(i =>
+                    i._id === id
+                        ? { ...i, quantity: i.quantity + qty }
+                        : i
+                );
+            } else {
+                return [
+                    ...prev,
+                    { ...product, _id: id, quantity: qty }
+                ];
+            }
         });
-    }, []);
+    };
 
-    // 4️⃣ Eliminar un producto del carrito
-    const removeItem = useCallback((productId) => {
-        setCart(prev => prev.filter(i => i._id !== productId));
-    }, []);
+    const removeItem = id => {
+        setCart(prev => prev.filter(i => i._id !== id));
+    };
 
-    // 5️⃣ Cambiar cantidad de un ítem
-    const updateItemQuantity = useCallback((productId, quantity) => {
-        setCart(prev => {
-            const updated = prev.map(i =>
-                i._id === productId ? { ...i, quantity } : i
-            );
-            // opcionalmente filtrar out si quantity <= 0
-            return updated.filter(i => i.quantity > 0);
-        });
-    }, []);
+    const updateItemQuantity = (id, qty) => {
+        setCart(prev =>
+            prev.map(i => {
+                if (i._id !== id) return i;
+                const stock = i.quantityInStock ?? i.quantity; // si guardas stock separado
+                const newQty = Math.min(Math.max(qty, 1), stock);
+                if (qty > stock) {
+                    Swal.fire('Ups', `Sólo hay ${stock} unidades disponibles`, 'warning');
+                }
+                return { ...i, quantity: newQty };
+            })
+        );
+    };
 
-    // 6️⃣ Vaciar carrito
-    const clearCart = useCallback(() => {
-        setCart([]);
-    }, []);
+    const clearCart = () => setCart([]);
 
-    // 7️⃣ Totales
     const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
-    const totalPrice = cart.reduce((sum, i) => sum + i.quantity * (i.price * (1 - (i.discount || 0) / 100)), 0);
+    const totalPrice = cart.reduce(
+        (sum, i) => sum + i.quantity * i.price * (1 - (i.discount || 0) / 100),
+        0
+    );
 
     return (
         <CartContext.Provider value={{
@@ -79,8 +82,4 @@ export const CartProvider = ({ children }) => {
     );
 };
 
-export const useCart = () => {
-    const ctx = useContext(CartContext);
-    if (!ctx) throw new Error("useCart debe usarse dentro de <CartProvider>");
-    return ctx;
-};
+export const useCart = () => useContext(CartContext);

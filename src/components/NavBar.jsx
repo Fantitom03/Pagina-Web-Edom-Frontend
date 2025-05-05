@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { can } from '../utils/auth';
+import ThemeToggle from "./ThemeToggle";
+import { useCart } from '../context/CartContext';
+
 
 const NavBar = () => {
+    const { totalItems } = useCart();
     const { user, logout } = useAuth();
     const canManage = user?.permissions.includes('read:users') || user?.permissions.includes('manage:all');
-    
+
     const navLinks = [
         { label: 'Inicio', path: '/', show: true },
         { label: 'Productos', path: '/items', show: true },
@@ -19,14 +23,25 @@ const NavBar = () => {
                     <Link to="/" className="text-2xl font-bold text-primary">
                         E-DOM
                     </Link>
-                    
+
                     <div className="hidden md:flex gap-6 items-center">
                         {navLinks.map((link) => link.show && (
                             <Link key={link.path} to={link.path} className="hover:text-primary-dark">
                                 {link.label}
                             </Link>
                         ))}
-                        
+
+                        <ThemeToggle />
+
+                        <Link to="/cart" className="relative p-2">
+                            🛒
+                            {totalItems > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                                    {totalItems}
+                                </span>
+                            )}
+                        </Link>
+
                         {user ? (
                             <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded">
                                 Cerrar Sesión

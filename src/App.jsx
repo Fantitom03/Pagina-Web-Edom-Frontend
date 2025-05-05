@@ -1,23 +1,26 @@
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { ItemProvider } from "./context/ItemContext"; // 👈 ¡Faltaba este import!
+import { ItemProvider } from "./context/ItemContext";
 import { CartProvider } from './context/CartContext';
+import { ThemeProvider } from "./context/ThemeContext";
 import NavBar from "./components/NavBar";
 import AppRouter from "./routes/AppRouter";
 
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <ItemProvider>
-          <BrowserRouter>
-            <NavBar />
-            <main className="min-h-screen bg-gray-50">
-              <AppRouter />
-            </main>
-          </BrowserRouter>
-        </ItemProvider>
-      </CartProvider>
+      <ThemeProvider>
+        <CartProvider>
+          <ItemProvider>
+            <BrowserRouter>
+              <NavBar />
+              <main className="min-h-screen bg-gray-50">
+                <AppRouter />
+              </main>
+            </BrowserRouter>
+          </ItemProvider>
+        </CartProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

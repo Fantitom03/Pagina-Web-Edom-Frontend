@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useAuth } from './AuthContext'; // Asegúrate de importar el contexto de autenticación
 import api from '../api/edomApi';
 
 const ItemContext = createContext();
 
 export const ItemProvider = ({ children }) => {
+  const { user } = useAuth(); 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,6 +21,7 @@ export const ItemProvider = ({ children }) => {
   // Función principal para obtener items con parámetros de filtrado
   const getItems = useCallback(
     async ({ page = 1, q = '', category = '', minPrice = '', maxPrice = '' } = {}, reset = false) => {
+      if (!user) return; // <<-- bail out si no estamos autenticados
       setLoading(true);
       setError(null);
 
@@ -63,20 +66,23 @@ export const ItemProvider = ({ children }) => {
     },
     [pagination.limit]
   );
-
+    
   // cada vez que cambien búsqueda o filtros, recarga desde página 1
   useEffect(() => {
-    getItems({
-      page: 1,
-      q: searchQuery,
-      category: filters.category,
-      minPrice: filters.minPrice,
-      maxPrice: filters.maxPrice
-    }, true);
+    if (user) {
+      getItems({
+        page: 1,
+        q: searchQuery,
+        category: filters.category,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice
+      }, true);
+    }
   }, [searchQuery, filters.category, filters.minPrice, filters.maxPrice, getItems]);
 
   // infinite scroll idéntico a antes…
   useEffect(() => {
+    if (!user) return;
     const sentinel = document.getElementById('infinite-loader');
     if (!sentinel) return;
     const obs = new IntersectionObserver(entries => {

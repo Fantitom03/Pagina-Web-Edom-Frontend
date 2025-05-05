@@ -1,8 +1,8 @@
 import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ItemCard from '../components/ItemCard';
 import SearchFilters from '../components/SearchFilters';
 import { useItems } from '../context/ItemContext';
+import ItemCard from '../components/ItemCard';
 import { useCategories } from '../hooks/useCategories';
 
 export default function ItemList() {
@@ -61,6 +61,8 @@ export default function ItemList() {
                     <span>+</span> Nuevo Producto
                 </button>
             </div>
+
+
 
             {/* Grid de items */}
 

@@ -12,7 +12,10 @@ export default function ItemEdit() {
 
     useEffect(() => {
         getItem(id)
-            .then(data => setDefaultValues(data))
+            .then(data => setDefaultValues({
+                ...data,
+                category: data.category?._id || ''
+            }))
             .catch(() => {
                 Swal.fire('Error', 'No se pudo cargar el producto', 'error');
                 navigate('/items', { replace: true });
