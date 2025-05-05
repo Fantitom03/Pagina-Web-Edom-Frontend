@@ -1,47 +1,34 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useItems } from '../hooks/useItems';
-import { useAuth } from '../context/AuthContext';
+import { useItemDetail } from '../hooks/useItemDetail';
+import { useCart } from '../context/CartContext';
+import Swal from 'sweetalert2';
 
 const ItemDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const { user } = useAuth();
-    const { getItem } = useItems();
-    const [item, setItem] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const {
+        item,
+        loading,
+        isDeleting,
+        canEdit,
+        canDelete,
+        priceData,
+        handleDelete,
+        navigate
+    } = useItemDetail();
+    const { addItem } = useCart();
 
-    useEffect(() => {
-        const loadItem = async () => {
-            try {
-                setLoading(true);
-                const data = await getItem(id);
-                setItem(data);
-            } catch (error) {
-                console.error('Error cargando item:', error);
-                navigate('/items', { replace: true });
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadItem();
-    }, [id, navigate, getItem]);
-
-    const handleBuy = () => {
-        // Lógica temporal de compra
-        console.log("Iniciando compra del producto:", item._id);
-        // navigate('/checkout');
+    const handleAddToCart = () => {
+        addItem(item, 1);
+        // opcional: notificación SweetAlert, toast…
+        Swal.fire({
+            icon: 'success',
+            title: 'Producto añadido al carrito',
+            text: `${item.name} ha sido añadido a tu carrito.`,
+            showConfirmButton: false,
+            timer: 1500
+        });
     };
 
     if (loading) return <div className="text-center py-8">Cargando...</div>;
     if (!item) return <div className="text-center py-8">Producto no encontrado</div>;
-
-    // Calcular precios
-    const originalPrice = item.price;
-    const discount = item.discount || 0;
-    const finalPrice = discount > 0
-        ? originalPrice * (1 - discount / 100)
-        : originalPrice;
 
     return (
         <div className="container mx-auto px-4 pt-20 min-h-screen">
@@ -49,7 +36,7 @@ const ItemDetail = () => {
 
                 {/* Botón de volver */}
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate('/items')}
                     className="mb-6 text-emerald-600 hover:text-emerald-800 flex items-center gap-2 transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,21 +58,21 @@ const ItemDetail = () => {
 
                         {/* Sección de precios */}
                         <div className="mb-6">
-                            {discount > 0 ? (
+                            {priceData.discount > 0 ? (
                                 <div className="flex items-baseline gap-4">
                                     <span className="text-4xl font-bold text-emerald-600">
-                                        ${finalPrice.toFixed(2)}
+                                        ${priceData.final.toFixed(2)}
                                     </span>
                                     <span className="text-xl text-gray-500 line-through">
-                                        ${originalPrice.toFixed(2)}
+                                        ${priceData.original.toFixed(2)}
                                     </span>
                                     <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">
-                                        {discount}% OFF
+                                        {priceData.discount}% OFF
                                     </span>
                                 </div>
                             ) : (
                                 <span className="text-4xl font-bold text-emerald-600">
-                                    ${originalPrice.toFixed(2)}
+                                    ${priceData.original.toFixed(2)}
                                 </span>
                             )}
                         </div>
@@ -104,10 +91,6 @@ const ItemDetail = () => {
                                 </p>
                             </div>
 
-                            <div className="bg-gray-50 p-4 rounded-lg col-span-2">
-                                <h3 className="text-sm font-semibold text-gray-500 mb-1">SKU</h3>
-                                <p className="font-mono font-medium">{item.sku || 'N/A'}</p>
-                            </div>
                         </div>
 
                         {/* Descripción */}
@@ -119,28 +102,35 @@ const ItemDetail = () => {
                         {/* Botones de acción */}
                         <div className="flex flex-wrap gap-3">
                             <button
-                                onClick={handleBuy}
+                                onClick={() => console.log("Iniciando compra...")}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg transition-colors font-medium flex-1"
                                 disabled={item.quantity <= 0}
                             >
                                 {item.quantity > 0 ? 'Comprar ahora' : 'Producto agotado'}
                             </button>
 
-                            {user?.role === 'admin' && (
-                                <>
-                                    <button
-                                        onClick={() => navigate(`/items/${item._id}/edit`)}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                        Editar
-                                    </button>
-                                    <button
-                                        onClick={() => {/* Lógica de eliminación */ }}
-                                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                        Eliminar
-                                    </button>
-                                </>
+                            <button onClick={handleAddToCart}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg">
+                                Agregar al carrito
+                            </button>
+
+                            {canEdit && (
+                                <button
+                                    onClick={() => navigate(`/items/edit/${item._id}`)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                >
+                                    Editar
+                                </button>
+                            )}
+
+                            {canDelete && (
+                                <button
+                                    onClick={handleDelete}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? 'Eliminando...' : 'Eliminar'}
+                                </button>
                             )}
                         </div>
                     </div>

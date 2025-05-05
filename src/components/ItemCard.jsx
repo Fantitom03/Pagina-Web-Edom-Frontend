@@ -1,16 +1,14 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { can } from '../utils/auth';
+import { useCart } from '../context/CartContext';
 
-const ItemCard = ({ item, onAddToCart }) => {
-    const { user } = useAuth();
-    const canEdit = can(user, 'update:items');
-    
+const ItemCard = ({ item }) => {
+    const { addItem } = useCart();
+
     // 1. Calcular precios de forma segura
     const price = item?.price || 0;
     const discount = item?.discount || 0;
-    const finalPrice = discount > 0 
-        ? price * (1 - discount / 100) 
+    const finalPrice = discount > 0
+        ? price * (1 - discount / 100)
         : price;
 
     // 2. Manejar imagen rota
@@ -28,13 +26,12 @@ const ItemCard = ({ item, onAddToCart }) => {
             )}
 
             <Link to={`/items/${item?._id}`}>
-                <img 
-                    src={item?.image} 
-                    alt={item?.name} 
-                    className="w-full h-48 object-cover"
-                    onError={handleImageError}
-                    loading="lazy"
-                />
+                {item.image
+                    ? <img className="w-full h-48 object-cover"
+                        onError={handleImageError}
+                        loading="lazy" src={item.image} />
+                    : <div className="w-full h-48 bg-gray-200 flex items-center justify-center">Sin imagen</div>
+                }
             </Link>
 
             <div className="p-4">
@@ -55,25 +52,14 @@ const ItemCard = ({ item, onAddToCart }) => {
                     )}
                 </div>
 
-                <div className="flex justify-between items-center">
-                    <button 
-                        onClick={onAddToCart}
-                        className="btn-primary"
-                        disabled={!item?.quantity}
-                    >
-                        {item?.quantity > 0 ? 'Agregar al carrito' : 'Sin stock'}
-                    </button>
-                    
-                    {/* 3. Mostrar edición solo con permiso */}
-                    {canEdit && (
-                        <Link
-                            to={`/items/edit/${item?._id}`}
-                            className="text-gray-500 hover:text-primary-dark"
-                        >
-                            ✏️ Editar
-                        </Link>
-                    )}
-                </div>
+                <button
+                    onClick={() => addItem(item, 1)}
+                    disabled={item.quantity <= 0}
+                    className="btn-primary"
+                >
+                    {item.quantity > 0 ? 'Agregar' : 'Sin stock'}
+                </button>
+
             </div>
         </div>
     );

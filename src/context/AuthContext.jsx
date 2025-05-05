@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../api/edomApi";
-import { jwtDecode } from "jwt-decode";
 import Swal from "sweetalert2";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [authInitializing, setAuthInitializing] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem("edomToken");
@@ -16,30 +16,37 @@ export const AuthProvider = ({ children }) => {
             try {
                 const parsedUser = JSON.parse(savedUser);
                 setUser(parsedUser);
-                api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             } catch (error) {
                 console.error("Error parsing user:", error);
             }
         }
+        setAuthInitializing(false);
     }, []);
+
+    if (authInitializing) {
+        return <div className="text-center py-20">Cargando sesión…</div>;
+    }
 
     const login = async (email, password) => {
         try {
             const response = await api.post("/auth/login", { email, password });
-            const { token, user: userData } = response.data;
+            const { token, user: rawUser } = response.data;
 
-            const decoded = jwtDecode(token);
-            const userWithRole = {
-                ...userData,
-                role: decoded.role || "user"
+            const { role } = rawUser;
+
+            // Construyo el usuario "enriquecido" usando lo que ya viene:
+            const enrichedUser = {
+                ...rawUser,
+                role: role.name,
+                permissions: role.permissions.map(p => p.name)
             };
 
+            // Persisto todo igual que antes
             localStorage.setItem("edomToken", token);
-            localStorage.setItem("edomUser", JSON.stringify(userWithRole));
-            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            setUser(userWithRole);
+            localStorage.setItem("edomUser", JSON.stringify(enrichedUser));
+            setUser(enrichedUser);
 
-            return true;
+            return { token, user: enrichedUser };
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -47,7 +54,7 @@ export const AuthProvider = ({ children }) => {
                 text: "Credenciales incorrectas",
                 confirmButtonColor: "#FF6B35"
             });
-            return false;
+            return null;
         }
     };
 

@@ -11,5 +11,9 @@ export const decodeToken = (token) => {
 };
 
 export const can = (user, permission) => {
-    return user?.permissions?.includes(permission);
+    if (!user || !Array.isArray(user.permissions)) return false;
+    // si es súper-admin
+    if (user.permissions.includes('manage:all')) return true;
+    // permiso puntual
+    return user.permissions.includes(permission);
 };

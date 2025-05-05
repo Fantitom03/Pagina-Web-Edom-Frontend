@@ -4,13 +4,12 @@ import { can } from '../utils/auth';
 
 const NavBar = () => {
     const { user, logout } = useAuth();
+    const canManage = user?.permissions.includes('read:users') || user?.permissions.includes('manage:all');
     
     const navLinks = [
         { label: 'Inicio', path: '/', show: true },
         { label: 'Productos', path: '/items', show: true },
-        { label: 'Admin Usuarios', path: '/admin/users', show: can(user, 'manage:users') },
-        { label: 'Vender', path: '/items/new', show: can(user, 'create:items') },
-        { label: 'Mi Perfil', path: '/profile', show: !!user },
+        { label: 'Admin Usuarios', path: '/users', show: can(user, 'manage:users') },
     ];
 
     return (
