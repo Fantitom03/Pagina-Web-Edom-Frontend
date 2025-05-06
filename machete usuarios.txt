@@ -1,0 +1,18 @@
+📝 Resumen de usuarios creados:
+
+      Username: admin_user
+      Email: admin@edom.com
+      Rol: admin
+      Contraseña: Admin123! (sin hashear)
+
+
+      Username: seller_user
+      Email: seller@edom.com
+      Rol: seller
+      Contraseña: Seller123! (sin hashear)
+
+
+      Username: client_user
+      Email: client@edom.com
+      Rol: client
+      Contraseña: Client123! (sin hashear)
