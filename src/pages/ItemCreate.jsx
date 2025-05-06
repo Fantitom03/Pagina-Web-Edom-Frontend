@@ -18,18 +18,16 @@ export default function ItemCreate() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 pt-20">
+        <div className="container mx-auto px-4 py-8 pt-20 text-gray-950 dark:text-white">
             {/* Botón de volver */}
+            
+            <h1 className="text-3xl font-bold mb-8">Agregar Nuevo Producto</h1>
             <button
                 onClick={() => navigate(-1)}
-                className="mb-6 text-emerald-600 hover:text-emerald-800 flex items-center gap-2 transition-colors"
+                className="inline-flex items-center text-2xl hover:shadow-2xl hover:underline transition-all text-black hover:text-amber-500 dark:text-gray-200 dark:hover:text-orange-400 cursor-pointer"
             >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Volver
+                ← Volver
             </button>
-            <h1 className="text-3xl font-bold mb-8">Agregar Nuevo Producto</h1>
             <ItemForm
                 onSubmit={onSubmit}
                 defaultValues={{

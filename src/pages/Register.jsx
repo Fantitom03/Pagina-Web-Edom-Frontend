@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link  } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 export default function Register() {
@@ -27,32 +27,52 @@ export default function Register() {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded">
-            <h2 className="text-2xl mb-4">Registrarse</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="max-w-md mx-auto mt-15 p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white text-center">Registrarse</h2>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <div>
+                    <input
+                        placeholder="Usuario"
+                        {...register('username', { required: true })}
+                        className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-300"
+                    />
+                    {errors.username && <p className="text-red-500 text-sm mt-1">Usuario requerido</p>}
+                </div>
 
-                <input placeholder="Usuario" {...register('username', { required: true })}
-                    className="w-full border p-2 rounded" />
-                {errors.username && <p className="text-red-500">Usuario requerido</p>}
+                <div>
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        {...register('email', { required: true })}
+                        className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-300"
+                    />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">Email requerido</p>}
+                </div>
 
-                <input type="email" placeholder="Email" {...register('email', { required: true })}
-                    className="w-full border p-2 rounded" />
-                {errors.email && <p className="text-red-500">Email requerido</p>}
+                <div>
+                    <input
+                        type="password"
+                        placeholder="Contraseña"
+                        {...register('password', { required: true })}
+                        className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-300"
+                    />
+                    {errors.password && <p className="text-red-500 text-sm mt-1">Contraseña requerida</p>}
+                </div>
 
-                <input type="password" placeholder="Contraseña" {...register('password', { required: true })}
-                    className="w-full border p-2 rounded" />
-                {errors.password && <p className="text-red-500">Contraseña requerida</p>}
-
-                <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">Crear cuenta</button>
+                <button
+                    type="submit"
+                    className="cursor-pointer w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg transition-colors"
+                >
+                    Crear cuenta
+                </button>
 
                 <div className="text-center mt-4">
-                    <span className="text-gray-600">¿Ya tienes cuenta? </span>
-                    <Link to="/login" className="text-primary underline hover:text-primary-dark">
+                    <span className="text-gray-700 dark:text-gray-300">¿Ya tienes cuenta? </span>
+                    <Link to="/login" className="text-orange-500 hover:underline cursor-pointer">
                         Inicia sesión aquí
                     </Link>
                 </div>
             </form>
-
         </div>
     );
 }

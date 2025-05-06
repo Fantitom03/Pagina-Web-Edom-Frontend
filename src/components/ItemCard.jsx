@@ -1,68 +1,77 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-const ItemCard = ({ item }) => {
-    const { addItem } = useCart();
+export default function ItemCard({ item }) {
+    const { addItem, cart } = useCart();
 
-    // 1. Calcular precios de forma segura
+    // Precio final con descuento
     const price = item?.price || 0;
     const discount = item?.discount || 0;
     const finalPrice = discount > 0
         ? price * (1 - discount / 100)
         : price;
 
-    // 2. Manejar imagen rota
-    const handleImageError = (e) => {
-        e.target.src = '/placeholder-product.jpg';
-    };
+    // Cuánto hay en el carrito
+    const inCart = cart.find(i => i._id === item._id);
+    const cartQty = inCart?.quantity ?? 0;
 
     return (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-            {/* Badge de descuento */}
+        <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden">
             {discount > 0 && (
-                <div className="absolute bg-primary text-white px-3 py-1 text-sm font-bold rounded-tr-xl rounded-bl-xl">
+                <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
                     -{discount}%
-                </div>
+                </span>
             )}
 
-            <Link to={`/items/${item?._id}`}>
+            <Link to={`/items/${item._id}`}>
                 {item.image
-                    ? <img className="w-full h-48 object-cover"
-                        onError={handleImageError}
-                        loading="lazy" src={item.image} />
-                    : <div className="w-full h-48 bg-gray-200 flex items-center justify-center">Sin imagen</div>
+                    ? <img
+                        src={item.image}
+                        alt={item.name}
+                        onError={e => e.currentTarget.src = '/placeholder-product.jpg'}
+                        className="w-full h-48 object-cover"
+                        loading="lazy"
+                    />
+                    : <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                        Sin imagen
+                    </div>
                 }
             </Link>
 
-            <div className="p-4">
-                <h3 className="text-xl font-semibold mb-2">
-                    <Link to={`/items/${item?._id}`} className="hover:text-primary-dark">
-                        {item?.name || 'Nombre no disponible'}
-                    </Link>
-                </h3>
+            <div className="p-4 flex flex-col">
+                <Link to={`/items/${item._id}`}>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 hover:text-orange-500 transition">
+                        {item.name}
+                    </h3>
+                </Link>
 
-                <div className="flex justify-between items-center mb-2">
-                    <span className="text-2xl font-bold text-primary">
+                <div className="mt-2 flex items-baseline justify-between">
+                    <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
                         ${finalPrice.toFixed(2)}
                     </span>
                     {discount > 0 && (
-                        <span className="text-sm line-through text-gray-500">
+                        <span className="text-sm line-through text-gray-400 dark:text-gray-500">
                             ${price.toFixed(2)}
                         </span>
                     )}
                 </div>
 
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                    Disponibles: {item.quantity - cartQty}
+                </p>
+
                 <button
                     onClick={() => addItem(item, 1)}
-                    disabled={item.quantity <= 0}
-                    className="btn-primary"
+                    disabled={item.quantity - cartQty <= 0}
+                    className={`cursor-pointer mt-4 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-white transition 
+            ${item.quantity - cartQty > 0
+                            ? 'bg-orange-500 hover:bg-orange-600'
+                            : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+                        }`}
                 >
-                    {item.quantity > 0 ? 'Agregar' : 'Sin stock'}
+                    {item.quantity - cartQty > 0 ? 'Agregar al carrito' : 'Sin stock'}
                 </button>
-
             </div>
         </div>
     );
-};
-
-export default ItemCard;
+}

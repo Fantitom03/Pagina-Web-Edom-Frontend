@@ -13,9 +13,9 @@ export default function ItemList() {
         loading,
         error,
         pagination,
+        getItems,
         searchQuery,
-        filters,
-        getItems
+        filters
     } = useItems();
 
     // Scroll infinito
@@ -23,9 +23,12 @@ export default function ItemList() {
         if (
             window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 &&
             !loading &&
-            pagination.hasMore   // ahora funciona
+            pagination.hasMore
         ) {
-            getItems({ page: pagination.page + 1, q: searchQuery, ...filters }, false);
+            getItems(
+                { page: pagination.page + 1, q: searchQuery, ...filters },
+                false
+            );
         }
     }, [loading, pagination, getItems, searchQuery, filters]);
 
@@ -36,45 +39,48 @@ export default function ItemList() {
 
     return (
         <div className="container mx-auto px-4 pt-20 pb-8">
-            {/* Botón de volver */}
+
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                Nuestros Productos
+            </h1>
+
             <button
                 onClick={() => navigate('/')}
-                className="mb-6 text-emerald-600 hover:text-emerald-800 flex items-center gap-2 transition-colors"
+                className="inline-flex items-center text-2xl hover:shadow-2xl hover:underline transition-all text-black hover:text-amber-500 dark:text-gray-200 dark:hover:text-orange-400 cursor-pointer"
             >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Volver
+                ← Volver
             </button>
 
-            <h1 className="text-3xl font-bold mb-4">Nuestros Productos</h1>
-
-            {/* Filtros y búsqueda */}
             {!loadingCats && <SearchFilters categories={categories} />}
 
-            {/* Botón nuevo */}
             <div className="mb-6 text-right">
                 <button
                     onClick={() => navigate('/items/new')}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition-colors inline-flex items-center gap-2"
+                    className="inline-flex items-center gap-2 px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition cursor-pointer"
                 >
-                    <span>+</span> Nuevo Producto
+                    <span className="text-2xl leading-none">+</span> Nuevo Producto
                 </button>
             </div>
 
-
-
-            {/* Grid de items */}
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items.map(item => <ItemCard key={item._id} item={item} />)}
+                {items.map(item => (
+                    <ItemCard key={item._id} item={item} />
+                ))}
             </div>
 
-            {loading && <p className="text-center py-8">Cargando...</p>}
-            {error && <p className="text-red-500 text-center py-4">{error}</p>}
-            {!pagination.hasMore && <p>Todos los productos cargados</p>}
-            {/* ¡No hace falta nada más! El <div id="infinite-loader" /> en el Provider se encarga. */}
+            {loading && (
+                <p className="text-center py-8 text-orange-500 dark:text-orange-400">
+                    Cargando…
+                </p>
+            )}
+            {error && (
+                <p className="text-center py-4 text-red-500">{error}</p>
+            )}
+            {!pagination.hasMore && !loading && (
+                <p className="text-center py-4 text-gray-600 dark:text-gray-400">
+                    Todos los productos cargados
+                </p>
+            )}
         </div>
-
     );
 }

@@ -1,156 +1,133 @@
 import { useItemDetail } from '../hooks/useItemDetail';
 import { useCart } from '../context/CartContext';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
-const ItemDetail = () => {
+export default function ItemDetail() {
     const {
-        item,
-        loading,
-        isDeleting,
-        canEdit,
-        canDelete,
-        priceData,
-        handleDelete,
-        navigate
+        item, loading, canEdit, canDelete,
+        priceData, handleDelete,
     } = useItemDetail();
-
     const { addItem, cart } = useCart();
 
-    const handleAddToCart = () => {
-        addItem(item, 1);
-        Swal.fire({
-            icon: 'success',
-            title: 'Añadido al carrito',
-            text: `${item.name} ha sido añadido.`,
-            showCancelButton: true,
-            confirmButtonText: 'Ver carrito',
-            cancelButtonText: 'Seguir comprando'
-        }).then(result => {
-            if (result.isConfirmed) navigate('/cart');
-        });
-    };
-
-    // Cantidad que ya tenemos en el carrito
     const inCart = cart.find(i => i._id === item?._id);
     const cartQty = inCart?.quantity ?? 0;
     const available = item?.quantity ?? 0;
     const canAdd = cartQty < available;
+    const navigate = useNavigate();
+
+    const handleAdd = () => {
+        addItem(item, 1);
+        Swal.fire({
+            icon: 'success',
+            title: 'Añadido',
+            text: `${item.name} añadido al carrito`,
+            showCancelButton: true,
+            confirmButtonText: 'Ver carrito',
+            cancelButtonText: 'Seguir comprando'
+        }).then(res => res.isConfirmed && navigate('/cart'));
+    };
 
     if (loading) return <div className="text-center py-8">Cargando...</div>;
-    if (!item) return <div className="text-center py-8">Producto no encontrado</div>;
+    if (!item) return <div className="text-center py-8">No encontrado</div>;
 
     return (
-        <div className="container mx-auto px-4 pt-20 min-h-screen">
-            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 border border-emerald-50">
+        <div className="text-gray-700 dark:text-gray-200 container mx-auto px-4 pt-20 pb-10 min-h-screen">
+            <button
+                onClick={() => navigate('/items')}
+                className="items-center text-2xl hover:shadow-2xl hover:underline transition-all text-black hover:text-amber-500 dark:text-gray-200 dark:hover:text-orange-400 cursor-pointer mb-3"
+            >
+                ← Volver al Listado
+            </button>
 
-                {/* Botón de volver */}
-                <button
-                    onClick={() => navigate('/items')}
-                    className="mb-6 text-emerald-600 hover:text-emerald-800 flex items-center gap-2 transition-colors"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Volver al listado
-                </button>
-
-                {/* Contenido principal */}
-                <div className="flex flex-col md:flex-row gap-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+                <div className="md:w-1/2 p-4 bg-gray-50 dark:bg-gray-700">
                     <img
-                        src={item.image}
+                        src={item.image || '/placeholder-product.jpg'}
                         alt={item.name}
-                        className="w-full md:w-1/2 h-96 object-contain bg-gray-50 rounded-lg p-4 border"
+                        className="w-full h-80 object-contain rounded-lg"
                     />
+                </div>
 
-                    <div className="flex-1">
-                        <h1 className="text-3xl font-bold mb-4">{item.name}</h1>
+                <div className="flex-1 p-6 space-y-4">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+                        {item.name}
+                    </h1>
 
-                        {/* Sección de precios */}
-                        <div className="mb-6">
-                            {priceData.discount > 0 ? (
-                                <div className="flex items-baseline gap-4">
-                                    <span className="text-4xl font-bold text-emerald-600">
-                                        ${priceData.final.toFixed(2)}
-                                    </span>
-                                    <span className="text-xl text-gray-500 line-through">
-                                        ${priceData.original.toFixed(2)}
-                                    </span>
-                                    <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">
-                                        {priceData.discount}% OFF
-                                    </span>
-                                </div>
-                            ) : (
-                                <span className="text-4xl font-bold text-emerald-600">
+                    <div className="space-y-2">
+                        {priceData.discount > 0 ? (
+                            <div className="flex items-baseline gap-4">
+                                <span className="text-4xl font-bold text-orange-600 dark:text-orange-400">
+                                    ${priceData.final.toFixed(2)}
+                                </span>
+                                <span className="text-xl line-through text-gray-400 dark:text-gray-500">
                                     ${priceData.original.toFixed(2)}
                                 </span>
-                            )}
-                        </div>
-
-                        {/* Detalles del producto */}
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="text-sm font-semibold text-gray-500 mb-1">Categoría</h3>
-                                <p className="font-medium">{item.category?.name || 'Sin categoría'}</p>
+                                <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm">
+                                    {priceData.discount}% OFF
+                                </span>
                             </div>
+                        ) : (
+                            <span className="text-4xl font-bold text-orange-600 dark:text-orange-400">
+                                ${priceData.original.toFixed(2)}
+                            </span>
+                        )}
+                    </div>
 
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="text-sm font-semibold text-gray-500 mb-1">Disponibles</h3>
-                                <p className={`font-medium ${item.quantity > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                                    {item.quantity > 0 ? `${item.quantity} unidades` : 'Agotado'}
-                                </p>
-                            </div>
-
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <h3 className="text-sm text-gray-500">Categoría</h3>
+                            <p className="font-medium text-gray-800 dark:text-gray-200">
+                                {item.category?.name || 'Sin categoría'}
+                            </p>
                         </div>
-
-                        {/* Descripción */}
-                        <div className="mb-8">
-                            <h2 className="text-xl font-semibold mb-3">Descripción del producto</h2>
-                            <p className="text-gray-700 leading-relaxed">{item.description}</p>
+                        <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <h3 className="text-sm text-gray-500">Disponibles</h3>
+                            <p className={`font-medium ${available > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {available > 0 ? `${available} unidades` : 'Agotado'}
+                            </p>
                         </div>
+                    </div>
 
-                        {/* Botones de acción */}
-                        <div className="flex flex-wrap gap-3">
-                            {/* Botón para "comprar" */}
+                    <div className="space-y-6">
+                        <p className="text-gray-700 dark:text-gray-300">{item.description}</p>
+
+                        <div className="flex flex-wrap gap-4">
                             <button
-                                onClick={() => console.log("Iniciando compra...")}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg transition-colors font-medium flex-1"
-                                disabled={item.quantity <= 0}
+                                onClick={() => console.log('Compra!')}
+                                disabled={available <= 0}
+                                className={`flex-1 px-6 py-3 rounded-lg font-medium text-white transition 
+                                    ${available > 0 ? 'bg-orange-600 hover:bg-orange-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'}`}
                             >
-                                {item.quantity > 0 ? 'Comprar ahora' : 'Producto agotado'}
+                                {available > 0 ? 'Comprar ahora' : 'Agotado'}
                             </button>
 
-                            {/* Botón para agregar al carrito */}
                             <button
-                                onClick={handleAddToCart}
+                                onClick={handleAdd}
                                 disabled={!canAdd}
-                                className={`px-6 py-3 rounded-lg transition-colors ${canAdd
-                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                className={`px-6 py-3 rounded-lg font-medium text-white transition 
+                                    ${canAdd
+                                        ? 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+                                        : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
                                     }`}
                             >
-                                {canAdd
-                                    ? 'Agregar al carrito'
-                                    : `Máximo ${item.quantity} unidades`}
+                                {canAdd ? 'Agregar al carrito' : 'Máximo alcanzado'}
                             </button>
 
-                            {/* Botón para editar*/}
                             {canEdit && (
                                 <button
                                     onClick={() => navigate(`/items/edit/${item._id}`)}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg cursor-pointer"
                                 >
                                     Editar
                                 </button>
                             )}
-
-                            {/*Botón para eliminar*/}
                             {canDelete && (
                                 <button
                                     onClick={handleDelete}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                                    disabled={isDeleting}
+                                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg cursor-pointer"
                                 >
-                                    {isDeleting ? 'Eliminando...' : 'Eliminar'}
+                                    Eliminar
                                 </button>
                             )}
                         </div>
@@ -159,6 +136,4 @@ const ItemDetail = () => {
             </div>
         </div>
     );
-};
-
-export default ItemDetail;
+}

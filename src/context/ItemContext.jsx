@@ -10,7 +10,7 @@ export const ItemProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
-    page: 1, totalPages: 1, total: 0, limit: 12, hasMore: true
+    page: 1, totalPages: 1, total: 0, limit: 6, hasMore: true
   });
 
   const [searchQuery, setSearchQuery] = useState('');

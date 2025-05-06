@@ -66,16 +66,16 @@ export default function SearchFilters({ categories }) {
     };
 
     return (
-        <div className="bg-gray-50 p-4 rounded-lg shadow mb-8 max-w-4xl mx-auto">
+        <div className="text-gray-800 dark:text-white bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8 max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Input de texto de búsqueda */}
-                <div className="col-span-1 md:col-span-2">
+                <div className="col-span-full">
                     <input
                         type="text"
                         placeholder="🔍 Buscar productos..."
                         value={localQuery}
                         onChange={e => setLocalQuery(e.target.value)}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-orange-300"
                     />
                 </div>
 
@@ -90,7 +90,7 @@ export default function SearchFilters({ categories }) {
                             // Aplicar inmediatamente al cambiar categoría
                             setFilters(prev => ({ ...prev, category: newCategory }));
                         }}
-                        className="w-full px-4 py-2 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                        className="p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-orange-300"
                     >
                         <option value="">Todas las categorías</option>
                         {categories.map(cat => (
@@ -102,7 +102,7 @@ export default function SearchFilters({ categories }) {
                 </div>
 
                 {/* Rango de precios */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex gap-2 cursor-pointer">
                     <input
                         type="number"
                         placeholder="Mín $"
@@ -113,7 +113,7 @@ export default function SearchFilters({ categories }) {
                             setLocalFilters(prev => ({ ...prev, minPrice: value }));
                         }}
                         onBlur={applyFilters}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-orange-300 cursor-pointer"
                     />
                     <input
                         type="number"
@@ -125,16 +125,16 @@ export default function SearchFilters({ categories }) {
                             setLocalFilters(prev => ({ ...prev, maxPrice: value }));
                         }}
                         onBlur={applyFilters}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-orange-300"
                     />
                 </div>
             </div>
 
             {/* Botones de acción */}
-            <div className="flex justify-end mt-4 gap-2">
+            <div className="mt-4 flex justify-end gap-2">
                 <button
                     onClick={applyFilters}
-                    className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition cursor-pointer"
                 >
                     Aplicar Filtros
                 </button>
@@ -142,18 +142,9 @@ export default function SearchFilters({ categories }) {
                 {(localQuery || localFilters.category || localFilters.minPrice || localFilters.maxPrice) && (
                     <button
                         onClick={onClear}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 transition cursor-pointer"
                     >
                         Limpiar
-                    </button>
-                )}
-
-                {process.env.NODE_ENV === 'development' && (
-                    <button
-                        onClick={showCurrentState}
-                        className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors"
-                    >
-                        Debug
                     </button>
                 )}
             </div>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../api/edomApi";
 import Swal from "sweetalert2";
+import { useCart } from "./CartContext";
 
 const AuthContext = createContext();
 

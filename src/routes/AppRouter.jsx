@@ -10,10 +10,15 @@ import ItemDetail from '../pages/ItemDetail';
 import UsersList from '../pages/UsersList';
 import UserEdit from '../pages/UserEdit';
 import CartPage from '../pages/CartPage';
+import CategoryList from '../pages/CategoryList';
+import CategoryCreate from '../pages/CategoryCreate';
+import CategoryEdit from '../pages/CategoryEdit';
+
 
 export default function AppRouter() {
     return (
         <Routes>
+            {/* Rutas de Autenticación */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -24,6 +29,7 @@ export default function AppRouter() {
                 </PrivateRoute>
             } />
 
+            {/* Rutas para Items */}
             <Route path="/items/:id" element={
                 <PrivateRoute>
                     <ItemDetail />
@@ -44,22 +50,43 @@ export default function AppRouter() {
 
             <Route path="*" element={<div>404 Not Found</div>} />
 
+            {/* Rutas para Usuarios */}
             <Route path="/users" element={
                 <PrivateRoute requiredPermission="read:users">
                     <UsersList />
                 </PrivateRoute>
             } />
+            
             <Route path="/users/:id" element={
                 <PrivateRoute requiredPermission="update:users">
                     <UserEdit />
                 </PrivateRoute>
             } />
 
+            {/* Ruta para el carrito*/}
             <Route path="/cart" element={
                 <PrivateRoute>
                     <CartPage />
                 </PrivateRoute>
             } />
+
+            {/*Rutas para categorias*/}
+            <Route path="/categories" element={
+                <PrivateRoute requiredPermission="read:categories">
+                    <CategoryList />
+                </PrivateRoute>
+            } />
+            <Route path="/categories/new" element={
+                <PrivateRoute requiredPermission="create:categories">
+                    <CategoryCreate />
+                </PrivateRoute>
+            } />
+            <Route path="/categories/edit/:id" element={
+                <PrivateRoute requiredPermission="update:categories">
+                    <CategoryEdit />
+                </PrivateRoute>
+            } />
+
         </Routes>
     );
 }
