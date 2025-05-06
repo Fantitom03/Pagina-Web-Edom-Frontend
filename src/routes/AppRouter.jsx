@@ -86,6 +86,9 @@ export default function AppRouter() {
                     <CategoryEdit />
                 </PrivateRoute>
             } />
+            
+            {/* Rutas para redirigir a inicio si no se encuentra la página */}
+            <Route path='*' element={<Home />} />
 
         </Routes>
     );
