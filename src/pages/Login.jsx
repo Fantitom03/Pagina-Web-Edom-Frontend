@@ -12,7 +12,7 @@ export default function Login() {
 
     const onSubmit = async data => {
         const ok = await login(data.email, data.password);
-        if (ok) nav('/items');
+        if (ok) nav('/');
         else Swal.fire('Error', 'Credenciales inválidas', 'error');
     };
 
